@@ -1,19 +1,14 @@
 import { Suspense } from "react";
-import { PlusCircle } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { AlbumArtwork } from "@/components/album-artwork";
 import { TrackArtwork } from "@/components/track-artwork";
 import { Menu } from "@/components/menu";
 import { PodcastEmptyPlaceholder } from "@/components/podcast-empty-placeholder";
 import { Sidebar } from "@/components/sidebar";
 import SearchInlineForm from "@/components/search-inline-form";
 import SearchPagination from "@/components/search-pagination";
-import { listenNowAlbums, madeForYouAlbums } from "@/lib/albums";
 import { playlists } from "@/lib/playlists";
 import { searchTracks } from '@/lib/soundcloud';
 import { SoundCloudTrack } from '@/types/soundcloud';

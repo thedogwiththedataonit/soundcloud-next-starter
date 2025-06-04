@@ -37,7 +37,7 @@ export interface SoundCloudUser {
   online: boolean;
   likes_count: number;
   playlist_count: number;
-  subscriptions?: any[];
+  subscriptions?: unknown[];
 }
 
 export interface SoundCloudTrack {

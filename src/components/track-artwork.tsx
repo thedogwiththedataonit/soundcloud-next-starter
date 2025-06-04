@@ -11,16 +11,12 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { SoundCloudTrack } from "@/types/soundcloud";
-import AudioPlayer from "./AudioPlayer";
-import { SelectedTrack } from "@/lib/types";
 import { useMusicPlayer } from "@/contexts/music-player-context";
 import { convertToSelectedTrack } from "@/lib/track-utils";
 
 interface TrackArtworkProps extends React.HTMLAttributes<HTMLDivElement> {
   track: SoundCloudTrack;
   aspectRatio?: "portrait" | "square";
-  width?: number;
-  height?: number;
 }
 
 function formatNumber(num: number): string {
@@ -35,8 +31,6 @@ function formatNumber(num: number): string {
 export function TrackArtwork({
   track,
   aspectRatio = "portrait",
-  width,
-  height,
   className,
   ...props
 }: TrackArtworkProps) {

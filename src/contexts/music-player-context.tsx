@@ -19,7 +19,7 @@ interface MusicPlayerContextType extends MusicPlayerState {
   togglePlayPause: () => void;
   seekTo: (time: number) => void;
   setVolume: (volume: number) => void;
-  audioRef: React.RefObject<HTMLAudioElement>;
+  audioRef: React.RefObject<HTMLAudioElement | null>;
 }
 
 const MusicPlayerContext = createContext<MusicPlayerContextType | undefined>(undefined);
@@ -34,7 +34,7 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
     isLoading: false,
   });
 
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const shouldAutoPlay = useRef(false);
 
   const setCurrentTrack = useCallback((track: SelectedTrack) => {
