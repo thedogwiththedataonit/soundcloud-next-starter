@@ -42,7 +42,7 @@ async function SearchResultsContent({ query, page }: { query: string; page: numb
       return (
         <div className="text-center py-12">
           <div className="text-gray-500 text-lg">
-            No tracks found for "{query}"
+            No tracks found for &quot;{query}&quot;
           </div>
           <p className="text-gray-400 mt-2">
             Try adjusting your search terms or search for something else.
@@ -55,7 +55,7 @@ async function SearchResultsContent({ query, page }: { query: string; page: numb
       <>
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
-            Search results for "{query}"
+            Search results for &quot;{query}&quot;
           </h2>
           <p className="text-gray-600 mt-1">
             Showing {tracks.length} tracks (page {page})
@@ -111,7 +111,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               SoundCloud Search
             </h1>
             <p className="text-gray-600">
-              Discover music from SoundCloud's vast library
+              Discover music from SoundCloud&apos;s vast library
             </p>
           </div>
 

@@ -1,62 +1,250 @@
-import Link from 'next/link';
+import { Suspense } from "react";
+import { PlusCircle } from "lucide-react";
 
-export default function HomePage() {
+import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { AlbumArtwork } from "@/components/album-artwork";
+import { TrackArtwork } from "@/components/track-artwork";
+import { Menu } from "@/components/menu";
+import { PodcastEmptyPlaceholder } from "@/components/podcast-empty-placeholder";
+import { Sidebar } from "@/components/sidebar";
+import SearchInlineForm from "@/components/search-inline-form";
+import SearchPagination from "@/components/search-pagination";
+import { listenNowAlbums, madeForYouAlbums } from "@/lib/albums";
+import { playlists } from "@/lib/playlists";
+import { searchTracks } from '@/lib/soundcloud';
+import { SoundCloudTrack } from '@/types/soundcloud';
+
+interface MusicPageProps {
+  searchParams: Promise<{
+    q?: string;
+    page?: string;
+  }>;
+}
+
+function LoadingSpinner() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 flex items-center justify-center">
-      <div className="max-w-4xl mx-auto px-4 py-16">
-        <div className="text-center">
-          {/* Logo/Title */}
-          <div className="mb-8">
-            <h1 className="text-6xl font-bold text-white mb-4">
-              SoundCloud Search
-            </h1>
-            <p className="text-xl text-orange-100 mb-8">
-              Discover amazing music from SoundCloud's vast library
-            </p>
-          </div>
+    <div className="flex justify-center items-center py-12">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+    </div>
+  );
+}
 
-          {/* Features */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white">
-              <div className="text-3xl mb-3">🎵</div>
-              <h3 className="text-lg font-semibold mb-2">Search Tracks</h3>
-              <p className="text-orange-100 text-sm">
-                Find your favorite songs, discover new artists, and explore genres
-              </p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white">
-              <div className="text-3xl mb-3">⚡</div>
-              <h3 className="text-lg font-semibold mb-2">Fast Results</h3>
-              <p className="text-orange-100 text-sm">
-                Get instant search results with server-side rendering
-              </p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white">
-              <div className="text-3xl mb-3">🎯</div>
-              <h3 className="text-lg font-semibold mb-2">Smart Pagination</h3>
-              <p className="text-orange-100 text-sm">
-                Browse through thousands of tracks with easy navigation
-              </p>
-            </div>
-          </div>
+function SearchResults({ query, page }: { query: string; page: number }) {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <SearchResultsContent query={query} page={page} />
+    </Suspense>
+  );
+}
 
-          {/* CTA Button */}
-          <div className="space-y-4">
-            <Link
-              href="/search"
-              className="inline-flex items-center px-8 py-4 bg-white text-orange-600 font-semibold text-lg rounded-lg hover:bg-orange-50 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-200"
-            >
-              Start Searching Music
-              <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-            <p className="text-orange-100 text-sm">
-              No account required • Powered by SoundCloud API
+async function SearchResultsContent({ query, page }: { query: string; page: number }) {
+  const resultsPerPage = 25;
+  const offset = (page - 1) * resultsPerPage;
+
+  try {
+    const { tracks, nextHref } = await searchTracks(query, resultsPerPage, offset);
+    const hasNextPage = !!nextHref;
+
+    if (tracks.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <div className="text-muted-foreground text-lg">
+            No tracks found for &quot;{query}&quot;
+          </div>
+          <p className="text-muted-foreground/70 mt-2">
+            Try adjusting your search terms or search for something else.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-semibold tracking-tight">
+              Search results for &quot;{query}&quot;
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Showing {tracks.length} tracks (page {page})
             </p>
           </div>
         </div>
+
+        <Separator className="my-4" />
+
+            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {tracks.map((track: SoundCloudTrack) => (
+                <TrackArtwork
+                  key={track.id}
+                  track={track}
+                  className="w-[250px]"
+                  aspectRatio="portrait"
+                  width={250}
+                  height={330}
+                />
+              ))}
+            </div>
+
+        <SearchPagination
+          currentPage={page}
+          hasNextPage={hasNextPage}
+        />
+      </>
+    );
+  } catch (error) {
+    console.error('Search error:', error);
+    return (
+      <div className="text-center py-12">
+        <div className="text-destructive text-lg font-semibold">
+          Error searching tracks
+        </div>
+        <p className="text-muted-foreground mt-2">
+          There was an issue searching SoundCloud. Please try again later.
+        </p>
+        <details className="mt-4 text-sm text-muted-foreground">
+          <summary className="cursor-pointer">Error details</summary>
+          <pre className="mt-2 text-left bg-muted p-2 rounded">
+            {error instanceof Error ? error.message : 'Unknown error'}
+          </pre>
+        </details>
       </div>
-    </div>
+    );
+  }
+}
+
+export default async function MusicPage({ searchParams }: MusicPageProps) {
+  const params = await searchParams;
+  const query = params.q?.trim() || '';
+  const page = Math.max(1, parseInt(params.page || '1', 10));
+
+  return (
+    <>
+      <div className="hidden md:block">
+        <Menu />
+        <div className="border-t">
+          <div className="bg-background">
+            <div className="grid lg:grid-cols-5">
+              <Sidebar playlists={playlists} className="hidden lg:block" />
+              <div className="col-span-3 lg:col-span-4 lg:border-l">
+                <div className="h-full px-4 py-6 lg:px-8 ">
+                  <Tabs defaultValue="music" className="h-full space-y-6">
+                    <div className="space-between flex items-center">
+                      <TabsList>
+                        <TabsTrigger value="music" className="relative">
+                          Music
+                        </TabsTrigger>
+                        <TabsTrigger value="podcasts">Podcasts</TabsTrigger>
+                        <TabsTrigger value="live" disabled>
+                          Live
+                        </TabsTrigger>
+                      </TabsList>
+                      
+                      {/* Search Form */}
+                      <div className="mx-4 flex-1 max-w-md">
+                        <SearchInlineForm />
+                      </div>
+                      
+                      <div className="ml-auto">
+                        <Button>
+                          <PlusCircle />
+                          Add music
+                        </Button>
+                      </div>
+                    </div>
+                    <TabsContent
+                      value="music"
+                      className="border-none p-0 outline-none h-[400px] "
+                    >
+                      {query ? (
+                        <SearchResults query={query} page={page} />
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                              <h2 className="text-2xl font-semibold tracking-tight">
+                                Listen Now
+                              </h2>
+                              <p className="text-sm text-muted-foreground">
+                                Top picks for you. Updated daily.
+                              </p>
+                            </div>
+                          </div>
+                          <Separator className="my-4" />
+                          <div className="relative">
+                            <ScrollArea>
+                              <div className="flex space-x-4 pb-4">
+                                {listenNowAlbums.map((album) => (
+                                  <AlbumArtwork
+                                    key={album.name}
+                                    album={album}
+                                    className="w-[250px]"
+                                    aspectRatio="portrait"
+                                    width={250}
+                                    height={330}
+                                  />
+                                ))}
+                              </div>
+                              <ScrollBar orientation="horizontal" />
+                            </ScrollArea>
+                          </div>
+                          <div className="mt-6 space-y-1">
+                            <h2 className="text-2xl font-semibold tracking-tight">
+                              Made for You
+                            </h2>
+                            <p className="text-sm text-muted-foreground">
+                              Your personal playlists. Updated daily.
+                            </p>
+                          </div>
+                          <Separator className="my-4" />
+                          <div className="relative pb-4">
+                            <ScrollArea>
+                              <div className="flex space-x-4 pb-4">
+                                {madeForYouAlbums.map((album) => (
+                                  <AlbumArtwork
+                                    key={album.name}
+                                    album={album}
+                                    className="w-[150px]"
+                                    aspectRatio="square"
+                                    width={150}
+                                    height={150}
+                                  />
+                                ))}
+                              </div>
+                              <ScrollBar orientation="horizontal" />
+                            </ScrollArea>
+                          </div>
+                        </>
+                      )}
+                    </TabsContent>
+                    <TabsContent
+                      value="podcasts"
+                      className="h-full flex-col border-none p-0 data-[state=active]:flex"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <h2 className="text-2xl font-semibold tracking-tight">
+                            New Episodes
+                          </h2>
+                          <p className="text-sm text-muted-foreground">
+                            Your favorite podcasts. Updated daily.
+                          </p>
+                        </div>
+                      </div>
+                      <Separator className="my-4" />
+                      <PodcastEmptyPlaceholder />
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
