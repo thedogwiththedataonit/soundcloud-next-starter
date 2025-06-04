@@ -68,18 +68,18 @@ async function SearchResultsContent({ query, page }: { query: string; page: numb
             <p className="text-sm text-muted-foreground">
               Showing {tracks.length} tracks (page {page})
             </p>
-            
+
           </div>
           <SearchPagination
-          currentPage={page}
-          hasNextPage={hasNextPage}
-        />
-        </div>        
-        
+            currentPage={page}
+            hasNextPage={hasNextPage}
+          />
+        </div>
+
 
         <Separator className="my-4" />
 
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 sm:gap-6">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 sm:gap-6 overflow-y-auto h-full">
           {tracks.map((track: SoundCloudTrack) => (
             <TrackArtwork
               key={track.id}
@@ -117,75 +117,41 @@ export default async function MusicPage({ searchParams }: MusicPageProps) {
   const page = Math.max(1, parseInt(params.page || '1', 10));
 
   return (
-    <div className="pb-20">
-      <div className="hidden md:block">
-        <Menu />
-        <div className="border-t">
-          <div className="bg-background">
-            <div className="grid lg:grid-cols-5">
-              <Sidebar playlists={playlists} className="hidden lg:block" />
-              <div className="col-span-3 lg:col-span-4 lg:border-l">
-                <div className="h-full px-4 py-6 lg:px-8 ">
-                  <Tabs defaultValue="music" className="h-full space-y-6">
-                    <div className="space-between flex items-center">
-                      <TabsList>
-                        <TabsTrigger value="music" className="relative">
-                          Music
-                        </TabsTrigger>
-                        <TabsTrigger value="podcasts">Podcasts</TabsTrigger>
-                        <TabsTrigger value="live" disabled>
-                          Live
-                        </TabsTrigger>
-                      </TabsList>
-
-                      {/* Search Form */}
-                      <div className="mx-4 flex-1  w-full">
-                        <SearchInlineForm />
-                      </div>
-
+    <div className="h-screen w-full">
+      <Menu />
+      <div className="border-t h-[calc(100vh-40px)]">
+        <div className="bg-background">
+          <div className="grid lg:grid-cols-5">
+            <Sidebar playlists={playlists} className="hidden lg:block" />
+            <div className="col-span-3 lg:col-span-4 lg:border-l">
+              <div className="h-full px-4 py-6 lg:px-8 ">
+                    {/* Search Form */}
+                    <div className="mx-0 flex-1 pb-2 w-full">
+                      <SearchInlineForm />
                     </div>
-                    <TabsContent
-                      value="music"
-                      className="border-none p-0 outline-none h-[400px] "
-                    >
-                      {query ? (
-                        <SearchResults query={query} page={page} />
-                      ) : (
-                        <>
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                              <h2 className="text-2xl font-semibold tracking-tight">
-                                Search to get started
-                              </h2>
-                              <p className="text-sm text-muted-foreground">
-                                Play music from SoundCloud.
-                              </p>
-                            </div>
+
+                  <div
+                    className="border-none p-0 outline-none h-[calc(100vh-230px)]"
+                  >
+                    {query ? (
+                      <SearchResults query={query} page={page} />
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <h2 className="text-2xl font-semibold tracking-tight">
+                              Search to get started
+                            </h2>
+                            <p className="text-sm text-muted-foreground">
+                              Play music from SoundCloud.
+                            </p>
                           </div>
-                          <Separator className="my-4" />
-                          <SongEmptyPlaceholder />
-                        </>
-                      )}
-                    </TabsContent>
-                    <TabsContent
-                      value="podcasts"
-                      className="h-full flex-col border-none p-0 data-[state=active]:flex"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <h2 className="text-2xl font-semibold tracking-tight">
-                            New Episodes
-                          </h2>
-                          <p className="text-sm text-muted-foreground">
-                            Your favorite podcasts. Updated daily.
-                          </p>
                         </div>
-                      </div>
-                      <Separator className="my-4" />
-                      <PodcastEmptyPlaceholder />
-                    </TabsContent>
-                  </Tabs>
-                </div>
+                        <Separator className="my-4" />
+                        <SongEmptyPlaceholder />
+                      </>
+                    )}
+                  </div>
               </div>
             </div>
           </div>

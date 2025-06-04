@@ -42,7 +42,7 @@ export function MusicPlayerBar() {
         currentTrack ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
       )}
     >
-      <div className="flex items-center gap-4 px-4 py-3 max-w-screen-xl mx-auto">
+      <div className="flex items-center gap-4 px-4 py-3 mx-auto">
         {/* Track Info */}
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="w-12 h-12 rounded-md overflow-hidden bg-muted flex-shrink-0">
@@ -63,7 +63,7 @@ export function MusicPlayerBar() {
         </div>
 
         {/* Player Controls */}
-        <div className="flex flex-row items-center gap-2 flex-1 max-w-md">
+        <div className="flex flex-row items-center gap-2 flex-1 max-w-md justify-center">
           {/* Play/Pause Button */}
           <div className="flex items-center gap-2">
             <Button
@@ -71,7 +71,7 @@ export function MusicPlayerBar() {
               size="sm"
               onClick={togglePlayPause}
               disabled={isLoading}
-              className="h-8 w-8 p-0 rounded-full"
+              className="h-8 w-8 p-0 rounded-full cursor-pointer"
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -83,8 +83,8 @@ export function MusicPlayerBar() {
             </Button>
           </div>
 
-          {/* Progress Bar and Time */}
-          <div className="flex items-center gap-2 w-full">
+          {/* Progress Bar and Time hidden on mobile */}
+          <div className="flex items-center gap-2 w-full hidden md:flex">
             <span className="text-xs text-muted-foreground tabular-nums min-w-[2.5rem]">
               {formatTime(currentTime)}
             </span>
