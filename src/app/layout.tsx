@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { MusicPlayerProvider } from "@/contexts/music-player-context";
+import { MusicPlayerBar } from "@/components/music-player-bar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +30,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <MusicPlayerProvider>
+          {children}
+          <MusicPlayerBar />
+        </MusicPlayerProvider>
       </body>
     </html>
   );

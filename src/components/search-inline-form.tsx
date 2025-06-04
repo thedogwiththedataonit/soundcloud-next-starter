@@ -51,15 +51,15 @@ export default function SearchInlineForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2 max-w-md">
+    <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
           type="text"
           value={mounted ? query : ''}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search SoundCloud..."
-          className="pl-10 pr-10"
+          placeholder="Search for songs..."
+          className="pl-10 pr-10 h-10 w-full"
         />
         {query && (
           <button
@@ -71,7 +71,7 @@ export default function SearchInlineForm() {
           </button>
         )}
       </div>
-      <Button type="submit" size="sm">
+      <Button type="submit"  className="h-10">
         Search
       </Button>
     </form>

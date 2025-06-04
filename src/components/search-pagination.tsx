@@ -27,24 +27,8 @@ export default function SearchPagination({
   };
 
   return (
-    <div className="flex items-center justify-between pt-6 border-t">
-      <div className="flex flex-1 justify-between sm:hidden">
-        <Button
-          variant="outline"
-          onClick={() => navigateToPage(currentPage - 1)}
-          disabled={currentPage <= 1}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => navigateToPage(currentPage + 1)}
-          disabled={!hasNextPage}
-        >
-          Next
-        </Button>
-      </div>
-      <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+    <div className="flex items-center justify-between gap-4">
+      <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between gap-4">
         <div>
           <p className="text-sm text-muted-foreground">
             Page <span className="font-medium">{currentPage}</span>

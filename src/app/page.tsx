@@ -17,6 +17,7 @@ import { listenNowAlbums, madeForYouAlbums } from "@/lib/albums";
 import { playlists } from "@/lib/playlists";
 import { searchTracks } from '@/lib/soundcloud';
 import { SoundCloudTrack } from '@/types/soundcloud';
+import { SongEmptyPlaceholder } from "@/components/song-empty-placeholder";
 
 interface MusicPageProps {
   searchParams: Promise<{
@@ -72,28 +73,26 @@ async function SearchResultsContent({ query, page }: { query: string; page: numb
             <p className="text-sm text-muted-foreground">
               Showing {tracks.length} tracks (page {page})
             </p>
+            
           </div>
-        </div>
-
-        <Separator className="my-4" />
-
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {tracks.map((track: SoundCloudTrack) => (
-                <TrackArtwork
-                  key={track.id}
-                  track={track}
-                  className="w-[250px]"
-                  aspectRatio="portrait"
-                  width={250}
-                  height={330}
-                />
-              ))}
-            </div>
-
-        <SearchPagination
+          <SearchPagination
           currentPage={page}
           hasNextPage={hasNextPage}
         />
+        </div>        
+        
+
+        <Separator className="my-4" />
+
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 sm:gap-6">
+          {tracks.map((track: SoundCloudTrack) => (
+            <TrackArtwork
+              key={track.id}
+              track={track}
+              aspectRatio="portrait"
+            />
+          ))}
+        </div>
       </>
     );
   } catch (error) {
@@ -123,7 +122,7 @@ export default async function MusicPage({ searchParams }: MusicPageProps) {
   const page = Math.max(1, parseInt(params.page || '1', 10));
 
   return (
-    <>
+    <div className="pb-20">
       <div className="hidden md:block">
         <Menu />
         <div className="border-t">
@@ -143,18 +142,12 @@ export default async function MusicPage({ searchParams }: MusicPageProps) {
                           Live
                         </TabsTrigger>
                       </TabsList>
-                      
+
                       {/* Search Form */}
-                      <div className="mx-4 flex-1 max-w-md">
+                      <div className="mx-4 flex-1  w-full">
                         <SearchInlineForm />
                       </div>
-                      
-                      <div className="ml-auto">
-                        <Button>
-                          <PlusCircle />
-                          Add music
-                        </Button>
-                      </div>
+
                     </div>
                     <TabsContent
                       value="music"
@@ -167,57 +160,15 @@ export default async function MusicPage({ searchParams }: MusicPageProps) {
                           <div className="flex items-center justify-between">
                             <div className="space-y-1">
                               <h2 className="text-2xl font-semibold tracking-tight">
-                                Listen Now
+                                Search to get started
                               </h2>
                               <p className="text-sm text-muted-foreground">
-                                Top picks for you. Updated daily.
+                                Play music from SoundCloud.
                               </p>
                             </div>
                           </div>
                           <Separator className="my-4" />
-                          <div className="relative">
-                            <ScrollArea>
-                              <div className="flex space-x-4 pb-4">
-                                {listenNowAlbums.map((album) => (
-                                  <AlbumArtwork
-                                    key={album.name}
-                                    album={album}
-                                    className="w-[250px]"
-                                    aspectRatio="portrait"
-                                    width={250}
-                                    height={330}
-                                  />
-                                ))}
-                              </div>
-                              <ScrollBar orientation="horizontal" />
-                            </ScrollArea>
-                          </div>
-                          <div className="mt-6 space-y-1">
-                            <h2 className="text-2xl font-semibold tracking-tight">
-                              Made for You
-                            </h2>
-                            <p className="text-sm text-muted-foreground">
-                              Your personal playlists. Updated daily.
-                            </p>
-                          </div>
-                          <Separator className="my-4" />
-                          <div className="relative pb-4">
-                            <ScrollArea>
-                              <div className="flex space-x-4 pb-4">
-                                {madeForYouAlbums.map((album) => (
-                                  <AlbumArtwork
-                                    key={album.name}
-                                    album={album}
-                                    className="w-[150px]"
-                                    aspectRatio="square"
-                                    width={150}
-                                    height={150}
-                                  />
-                                ))}
-                              </div>
-                              <ScrollBar orientation="horizontal" />
-                            </ScrollArea>
-                          </div>
+                          <SongEmptyPlaceholder />
                         </>
                       )}
                     </TabsContent>
@@ -245,6 +196,6 @@ export default async function MusicPage({ searchParams }: MusicPageProps) {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/context-menu";
 import { SoundCloudTrack } from "@/types/soundcloud";
 import AudioPlayer from "./AudioPlayer";
+import { SelectedTrack } from "@/lib/types";
+import { useMusicPlayer } from "@/contexts/music-player-context";
+import { convertToSelectedTrack } from "@/lib/track-utils";
 
 interface TrackArtworkProps extends React.HTMLAttributes<HTMLDivElement> {
   track: SoundCloudTrack;
@@ -39,6 +42,8 @@ export function TrackArtwork({
 }: TrackArtworkProps) {
   const [imageError, setImageError] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { setCurrentTrack } = useMusicPlayer();
   
   // Get the best available artwork URL
   const getArtworkUrl = () => {
@@ -55,22 +60,38 @@ export function TrackArtwork({
     return avatarError ? '/placeholder-avatar.jpg' : (track.user.avatar_url || '/placeholder-avatar.jpg');
   };
 
+  const playTrack = async () => {
+    try {
+      setIsLoading(true);
+      const selectedTrack = await convertToSelectedTrack(track);
+      setCurrentTrack(selectedTrack);
+    } catch (error) {
+      console.error('Failed to play track:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className={cn("flex flex-col gap-3", className)} {...props}>
+    <div 
+      className={cn("flex flex-col gap-3 w-full", className)} {...props}>
       <ContextMenu>
         <ContextMenuTrigger>
-          <div className="overflow-hidden rounded-md">
+          <div 
+            onClick={playTrack}
+            className="overflow-hidden rounded-md cursor-pointer relative w-full">
+            {isLoading && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
             <img
               src={getArtworkUrl()}
               alt={track.title}
               className={cn(
-                "h-auto w-auto object-cover transition-all hover:scale-105",
+                "w-full h-auto object-cover transition-all hover:scale-105",
                 aspectRatio === "portrait" ? "aspect-[3/4]" : "aspect-square"
               )}
-              style={{
-                width: width ? `${width}px` : "auto",
-                height: height ? `${height}px` : "auto",
-              }}
               onError={() => setImageError(true)}
             />
           </div>
@@ -128,10 +149,6 @@ export function TrackArtwork({
         </div>
       </div>
       
-      {/* Audio Player */}
-      <div className="mt-2">
-        <AudioPlayer trackId={track.id.toString()} />
-      </div>
     </div>
   );
 } 

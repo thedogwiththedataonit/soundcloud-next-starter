@@ -1,7 +1,10 @@
 'use client';
 import { SoundCloudTrack } from '@/types/soundcloud';
 import { useState } from 'react';
-import AudioPlayer from './AudioPlayer';
+import { Play, Pause } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useMusicPlayer } from '@/contexts/music-player-context';
+import { convertToSelectedTrack } from '@/lib/track-utils';
 
 interface TrackCardProps {
   track: SoundCloudTrack;
@@ -34,6 +37,12 @@ function formatDate(dateString: string): string {
 export default function TrackCard({ track }: TrackCardProps) {
   const [imageError, setImageError] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { currentTrack, isPlaying, setCurrentTrack, togglePlayPause } = useMusicPlayer();
+  
+  // Check if this track is currently playing
+  const isCurrentTrack = currentTrack?.trackId === track.id.toString();
+  const showPlayingState = isCurrentTrack && isPlaying;
   
   // Get the best available artwork URL
   const getArtworkUrl = () => {
@@ -50,32 +59,66 @@ export default function TrackCard({ track }: TrackCardProps) {
     return avatarError ? '/placeholder-avatar.jpg' : (track.user.avatar_url || '/placeholder-avatar.jpg');
   };
 
+  const handlePlayClick = async () => {
+    if (isCurrentTrack) {
+      // If this track is already selected, just toggle play/pause
+      togglePlayPause();
+    } else {
+      // If this is a new track, load it
+      try {
+        setIsLoading(true);
+        const selectedTrack = await convertToSelectedTrack(track);
+        setCurrentTrack(selectedTrack);
+      } catch (error) {
+        console.error('Failed to play track:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
       <div className="flex p-4">
         {/* Artwork */}
-        <div className="flex-shrink-0 mr-4">
+        <div className="flex-shrink-0 mr-4 relative">
           <img
             src={getArtworkUrl()}
             alt={track.title}
             className="w-20 h-20 rounded-lg object-cover bg-gray-200"
             onError={() => setImageError(true)}
           />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Button
+              onClick={handlePlayClick}
+              size="sm"
+              className="w-8 h-8 rounded-full bg-orange-500 hover:bg-orange-600 text-white shadow-lg opacity-0 hover:opacity-100 transition-opacity duration-200"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+              ) : showPlayingState ? (
+                <Pause className="w-3 h-3" />
+              ) : (
+                <Play className="w-3 h-3 ml-0.5" />
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Track Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                <a
-                  href={track.permalink_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-orange-600 transition-colors"
+              <h3 className={`text-lg font-semibold truncate transition-colors ${
+                isCurrentTrack ? 'text-orange-600' : 'text-gray-900'
+              }`}>
+                <button
+                  onClick={handlePlayClick}
+                  className="hover:text-orange-600 transition-colors text-left"
                 >
                   {track.title}
-                </a>
+                </button>
               </h3>
               <p className="text-sm text-gray-600 flex items-center mt-1">
                 <img
@@ -147,14 +190,15 @@ export default function TrackCard({ track }: TrackCardProps) {
                   {track.genre}
                 </span>
               )}
+              {isCurrentTrack && (
+                <div className="flex items-center text-orange-600 text-xs">
+                  <div className="w-2 h-2 bg-orange-600 rounded-full mr-1 animate-pulse" />
+                  {showPlayingState ? 'Playing' : 'Paused'}
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
-      
-      {/* Audio Player - Full width section */}
-      <div className="px-4 pb-4">
-        <AudioPlayer trackId={track.id.toString()} />
       </div>
     </div>
   );
